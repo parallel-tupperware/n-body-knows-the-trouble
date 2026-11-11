@@ -58,26 +58,6 @@ def Calc_acc(Current_Pos):
     acc = np.sum(np.nan_to_num(norm_dist * mG / (r ** 2)), axis=1) #since all masses are equal the m^2 becomes m
     return acc
 
-
 Loop()
 
-
-#make initial scatter plot
-Scatter = ax.scatter(Pos[0,:,0], Pos[1,:,0], s = 10)
-
-ax.scatter(Pos[0,:,0], Pos[1,:,0], s = 10)
-ax.scatter(Pos[0,:,-1], Pos[1,:,-1], s = 10)
-plt.show()
-
-
-#function to extract the new positions
-#def update(frame):
-#    scatter.set_offsets(Pos[:,:,frame])
-#    return scatter
-
-#create animation
-#Writer = animation.FFMpegWriter(fps = 30, bitrate = 1e4)
-#ani = animation.FuncAnimation(fig, update, frames = T_Steps, interval = dt * 1000)
-#ani.save("C:/Users/mathe/Documents/TU delft/AP/Y1/Semester 1/HPC/N-body/Video.mp4", writer = Writer)
-#plt.show()
-#print("Done!")
+np.save(".\Calculated_Positions.npy", Pos)
