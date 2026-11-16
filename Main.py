@@ -6,13 +6,15 @@ import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 import math
 
-mG = 1
+mG = 0.1
+r_0 = 0.05
 
-N = 3
-T_Steps = 30
-dt = 0.1
+N = 800
+T_Steps = 1000
+dt = 0.05
 
-Side_Len = 10
+Side_Len = 150
+Buffer_Len = 0.05 * Side_Len
 
 Pos = np.zeros((2, N, T_Steps + 1))
 Vel = np.zeros((2, N, T_Steps + 1))
@@ -22,8 +24,8 @@ Pos_0 = Side_Len * np.random.rand(2, N)
 Pos[:,:,0] = Pos_0
 
 fig, ax = plt.subplots()
-ax.set_xlim(-1, 15) #set here the view limits of the x-axis
-ax.set_ylim(-1, 15) #same only for y-axis
+ax.set_xlim(-Buffer_Len, Side_Len + Buffer_Len) #set here the view limits of the x-axis
+ax.set_ylim(-Buffer_Len, Side_Len + Buffer_Len) #same only for y-axis
 
 
 def Velocity_Verlet(Current_Pos, Current_Vel, Current_Acc):
@@ -50,14 +52,38 @@ def Calc_dist(Current_Pos):
     dist = Current_Pos.reshape(2, N, 1) - Current_Pos.reshape(2, 1, N)
     r = np.sqrt(dist[0] ** 2 + dist[1] ** 2)
     
-    norm_dist = np.nan_to_num(dist / r)
+    norm_dist = dist / r
     return norm_dist, r
 
 def Calc_acc(Current_Pos):
     norm_dist, r = Calc_dist(Current_Pos)
-    acc = np.sum(np.nan_to_num(norm_dist * mG / (r ** 2)), axis=1) #since all masses are equal the m^2 becomes m
-    return acc
+    
+    acc = norm_dist * mG / (r ** 2) #since all masses are equal the m^2 becomes m
+    #add heaviside function:
+    r_to_close = r < r_0
+    acc[:,r_to_close] = 0
+    
+    acc_summed = np.sum(acc, axis = 1)
+    
+    return acc_summed
+
 
 Loop()
+
+
+#make initial scatter plot
+Scatter = ax.scatter(Pos[0,:,0], Pos[1,:,0], s = 10)
+
+#function to extract the new positions
+def update(frame):
+    Scatter.set_offsets(Pos[:,:,frame].T)
+    return Scatter
+
+#create animation
+Writer = animation.FFMpegWriter(fps = 30, bitrate = 1e4)
+ani = animation.FuncAnimation(fig, update, frames = T_Steps, interval = dt * 1000)
+ani.save("C:/Users/mathe/Documents/TU delft/AP/Y1/Semester 1/HPC/N-body/Video.mp4", writer = Writer)
+plt.show()
+#print("Done!")
 
 np.save(".\Calculated_Positions.npy", Pos)
