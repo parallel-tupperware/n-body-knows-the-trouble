@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Simulation data and video outputs
+results/*.npy
+renders/*.mp4
+!results/.gitkeep
+!renders/.gitkeep
+!benchmarks/.gitkeep
+
+# Environment
+.env
+.venv
+env/
+venv/
